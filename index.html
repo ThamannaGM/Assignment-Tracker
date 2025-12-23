@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Academics Tracker</title>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="main-wrapper">
+  <header>
+    <div class="title-group">
+      <h1 id="mainTitle">Assignment Tracker</h1>
+      <p class="subtitle">"Great things are done by a series of small things brought together."</p>
+    </div>
+    <button id="themeToggle">🌙 Dark Mode</button>
+  </header>
+  <div class="grid-container">
+    <aside class="sidebar">
+      <section class="card">
+        <h2>Subjects</h2>
+        <input type="text" id="newSubject" placeholder="Subject name">
+        <div id="colorPalette">
+          <p class="small-label">Choose a unique color:</p>
+          <div id="swatchContainer"></div>
+          <input type="hidden" id="newSubjectColor" value="">
+        </div>
+        <button id="addSubjectBtn" class="primary-btn">Add Subject</button>
+        <ul id="subjectList"></ul>
+      </section>
+      <section class="card">
+        <h2>New Assignment</h2>
+        <select id="subjectSelect">
+          <option value="" disabled selected hidden>Select Subject</option>
+        </select>
+        <select id="status">
+          <option>Not Started</option>
+          <option>Ongoing</option>
+          <option>Completed</option>
+        </select>
+        <input type="text" id="assignment" placeholder="Assignment name">
+        <input type="date" id="dueDate">
+        <button id="addBtn" class="primary-btn">Add Assignment</button>
+      </section>
+    </aside>
+
+    <main class="content">
+      <section class="card filters">
+        <select id="filterSubject">
+          <option value="">All Subjects</option>
+        </select>
+        <select id="filterStatus">
+          <option value="">All Status</option>
+          <option value="Not Started">Not Started</option>
+          <option value="Ongoing">Ongoing</option>
+          <option value="Completed">Completed</option>
+        </select>
+        <input type="text" id="searchInput" placeholder="Search Assignment...">
+      </section>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Subject</th>
+              <th>Status</th>
+              <th>Assignment</th>
+              <th>Days Left</th>
+              <th>Due Date</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </main>
+
+    <button id="clearAllBtn" class="secondary-btn">Clear All Assignments</button>
+  </div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
