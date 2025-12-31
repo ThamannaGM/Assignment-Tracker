@@ -213,6 +213,230 @@ document.getElementById("clearAllBtn").onclick = () => {
   }
 };
 
+
+
 document.getElementById("filterSubject").onchange = renderTable;
 document.getElementById("filterStatus").onchange = renderTable;
 document.getElementById("searchInput").oninput = renderTable;
+
+const calendarModal = document.getElementById("calendarModal");
+const calendarGrid = document.getElementById("calendarGrid");
+const calendarTitle = document.getElementById("calendarTitle");
+
+let calendarMonth = new Date().getMonth();
+let calendarYear = new Date().getFullYear();
+
+document.getElementById("calendarToggle").onclick = () => {
+  calendarModal.classList.remove("hidden");
+  renderCalendar();
+};
+
+document.getElementById("closeCalendar").onclick = () => {
+  calendarModal.classList.add("hidden");
+};
+
+document.getElementById("prevMonth").onclick = () => {
+  calendarMonth--;
+  if (calendarMonth < 0) {
+    calendarMonth = 11;
+    calendarYear--;
+  }
+  renderCalendar();
+};
+
+document.getElementById("nextMonth").onclick = () => {
+  calendarMonth++;
+  if (calendarMonth > 11) {
+    calendarMonth = 0;
+    calendarYear++;
+  }
+  renderCalendar();
+};
+
+function renderCalendar() {
+  calendarGrid.innerHTML = "";
+
+  calendarTitle.textContent = new Date(calendarYear, calendarMonth)
+    .toLocaleString("default", { month: "long", year: "numeric" });
+
+  const firstDay = new Date(calendarYear, calendarMonth, 1).getDay();
+  const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+
+  for (let i = 0; i < firstDay; i++) {
+    calendarGrid.appendChild(document.createElement("div"));
+  }
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dateStr = `${calendarYear}-${String(calendarMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+    const todaysAssignments = assignments.filter(a => a.dueDate === dateStr);
+
+    const cell = document.createElement("div");
+    cell.className = "calendar-day";
+    cell.innerHTML = `<strong>${day}</strong>`;
+
+    if (todaysAssignments.length) {
+      cell.classList.add("has-task");
+
+      todaysAssignments.forEach(a => {
+        const isExam = /\b(exam|midterm|quiz)\b/i.test(a.name);
+        if (isExam) cell.classList.add("exam-day");
+
+        cell.innerHTML += `
+          <div class="calendar-item">
+            <span class="cal-subject" style="background:${a.color}">
+              ${a.subject}
+            </span>
+            <span class="cal-name">${a.name}</span>
+            <span class="cal-status">${a.status}</span>
+          </div>
+        `;
+      });
+    }
+
+    calendarGrid.appendChild(cell);
+  }
+}
+
+const monthViewBtn = document.getElementById("monthViewBtn");
+const weekViewBtn = document.getElementById("weekViewBtn");
+
+monthViewBtn.onclick = () => {
+  monthViewBtn.classList.add("active");
+  weekViewBtn.classList.remove("active");
+  renderCalendar('month');
+};
+
+weekViewBtn.onclick = () => {
+  weekViewBtn.classList.add("active");
+  monthViewBtn.classList.remove("active");
+  renderCalendar('week');
+};
+
+const todayBtn = document.getElementById("todayBtn");
+
+document.getElementById("prevMonth").onclick = () => {
+  calendarMonth--;
+  if (calendarMonth < 0) {
+    calendarMonth = 11;
+    calendarYear--;
+  }
+  renderCalendar();
+};
+
+document.getElementById("nextMonth").onclick = () => {
+  calendarMonth++;
+  if (calendarMonth > 11) {
+    calendarMonth = 0;
+    calendarYear++;
+  }
+  renderCalendar();
+};
+
+todayBtn.onclick = () => {
+  const now = new Date();
+  calendarMonth = now.getMonth();
+  calendarYear = now.getFullYear();
+  renderCalendar();
+};
+
+function renderCalendar(viewType = 'month') {
+  calendarGrid.innerHTML = "";
+
+  calendarTitle.textContent = new Date(calendarYear, calendarMonth)
+    .toLocaleString("default", { month: "long", year: "numeric" });
+
+  const firstDay = new Date(calendarYear, calendarMonth, 1).getDay();
+  const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+
+  if (viewType === 'month') {
+    // Fill empty slots for previous month
+    for (let i = 0; i < firstDay; i++) {
+      const emptyDiv = document.createElement("div");
+      emptyDiv.className = "calendar-day empty";
+      calendarGrid.appendChild(emptyDiv);
+    }
+    
+    for (let day = 1; day <= daysInMonth; day++) {
+      addCalendarDay(day);
+    }
+  } else if (viewType === 'week') {
+    const today = new Date();
+    const start = new Date(today.setDate(today.getDate() - today.getDay()));
+    for (let i = 0; i < 7; i++) addCalendarDay(start.getDate() + i, start.getMonth(), start.getFullYear());
+  }
+}
+
+function addCalendarDay(day, month = calendarMonth, year = calendarYear) {
+  const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+  const todaysAssignments = assignments.filter(a => a.dueDate === dateStr);
+  
+  const now = new Date();
+  const isToday = day === now.getDate() && 
+                  month === now.getMonth() && 
+                  year === now.getFullYear();
+
+  const cell = document.createElement("div");
+  cell.className = "calendar-day";
+  if (isToday) cell.classList.add("today-highlight");
+
+  cell.innerHTML = `<strong>${day}</strong>`;
+
+  const dotContainer = document.createElement("div");
+  dotContainer.className = "mobile-dots";
+
+  if (todaysAssignments.length) {
+    cell.classList.add("has-task");
+    
+    todaysAssignments.forEach(a => {
+      const dot = document.createElement("span");
+      dot.className = "dot";
+      dot.style.backgroundColor = a.color;
+      dotContainer.appendChild(dot);
+
+      const isExam = /\b(exam|midterm|quiz)\b/i.test(a.name);
+      if (isExam) cell.classList.add("exam-day");
+
+      const item = document.createElement("div");
+      item.className = "calendar-item";
+      item.style.backgroundColor = a.color;
+      item.innerHTML = `<span class="cal-text"><span class="cal-subject-name">${a.subject}:</span> ${a.name}</span>`;
+      cell.appendChild(item);
+    });
+  }
+  
+  cell.appendChild(dotContainer);
+  
+  cell.onclick = () => {
+    if (window.innerWidth <= 768 && todaysAssignments.length > 0) {
+      showDayDetails(dateStr, todaysAssignments);
+    }
+  };
+
+  calendarGrid.appendChild(cell);
+}
+
+function showDayDetails(date, tasks) {
+  const overlay = document.createElement("div");
+  overlay.className = "mobile-detail-overlay";
+  
+  const taskList = tasks.map(a => `
+    <div class="detail-row" style="border-left: 5px solid ${a.color}">
+      <p style="font-size: 0.7rem; text-transform: uppercase; color: #a1887f;">${a.subject}</p>
+      <p style="font-weight: bold; margin: 2px 0;">${a.name}</p>
+      <p style="font-size: 0.75rem; opacity: 0.8;">Status: ${a.status}</p>
+    </div>
+  `).join('');
+
+  overlay.innerHTML = `
+    <div class="detail-content">
+      <div class="detail-header">
+        <h3>Tasks for ${new Date(date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</h3>
+        <button style="background:none; border:none; font-size: 1.2rem; cursor:pointer; color:inherit;" onclick="this.closest('.mobile-detail-overlay').remove()">✕</button>
+      </div>
+      ${taskList}
+    </div>
+  `;
+  document.body.appendChild(overlay);
+}
+
+
